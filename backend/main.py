@@ -127,3 +127,15 @@ class DrugList(BaseModel):
 @app.post("/check-interactions")
 def check_interactions_endpoint(payload: DrugList):
     return check_drug_interactions(payload.drugs)
+
+
+from medical_retrieval import store_medline_knowledge, retrieve_relevant_knowledge
+
+class TopicRequest(BaseModel):
+    term: str
+
+@app.post("/fetch-medical-knowledge")
+def fetch_medical_knowledge(payload: TopicRequest):
+    stored_count = store_medline_knowledge(payload.term)
+    retrieved = retrieve_relevant_knowledge(payload.term)
+    return {"term": payload.term, "stored_topics": stored_count, "retrieved_content": retrieved}
