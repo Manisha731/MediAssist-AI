@@ -69,3 +69,22 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     
     token = create_access_token({"sub": db_user.email})
     return {"access_token": token, "token_type": "bearer"}
+
+from fastapi import UploadFile, File
+from pypdf import PdfReader
+import io
+
+@app.post("/upload-report")
+async def upload_report(file: UploadFile = File(...)):
+    contents = await file.read()
+    pdf_reader = PdfReader(io.BytesIO(contents))
+    
+    extracted_text = ""
+    for page in pdf_reader.pages:
+        extracted_text += page.extract_text()
+    
+    return {
+        "filename": file.filename,
+        "pages": len(pdf_reader.pages),
+        "extracted_text": extracted_text
+    }
