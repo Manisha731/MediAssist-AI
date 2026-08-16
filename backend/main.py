@@ -117,3 +117,13 @@ async def summarize_report_endpoint(file: UploadFile = File(...)):
     summary = summarize_report(chunks)
     
     return {"filename": file.filename, "summary": summary}
+
+from drug_interaction import check_drug_interactions
+from pydantic import BaseModel
+
+class DrugList(BaseModel):
+    drugs: list[str]
+
+@app.post("/check-interactions")
+def check_interactions_endpoint(payload: DrugList):
+    return check_drug_interactions(payload.drugs)
