@@ -83,8 +83,19 @@ async def upload_report(file: UploadFile = File(...)):
     for page in pdf_reader.pages:
         extracted_text += page.extract_text()
     
+    chunks = chunk_text(extracted_text)
+    
     return {
         "filename": file.filename,
         "pages": len(pdf_reader.pages),
-        "extracted_text": extracted_text
+        "num_chunks": len(chunks),
+        "chunks": chunks
     }
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+def chunk_text(text: str):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50
+    )
+    return splitter.split_text(text)
