@@ -74,6 +74,8 @@ from fastapi import UploadFile, File
 from pypdf import PdfReader
 import io
 
+from vectorstore import store_chunks
+
 @app.post("/upload-report")
 async def upload_report(file: UploadFile = File(...)):
     contents = await file.read()
@@ -84,12 +86,13 @@ async def upload_report(file: UploadFile = File(...)):
         extracted_text += page.extract_text()
     
     chunks = chunk_text(extracted_text)
+    stored_count = store_chunks(chunks, report_id=file.filename)
     
     return {
         "filename": file.filename,
         "pages": len(pdf_reader.pages),
         "num_chunks": len(chunks),
-        "chunks": chunks
+        "stored_in_chroma": stored_count
     }
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -99,3 +102,18 @@ def chunk_text(text: str):
         chunk_overlap=50
     )
     return splitter.split_text(text)
+from summarizer import summarize_report
+
+@app.post("/summarize-report")
+async def summarize_report_endpoint(file: UploadFile = File(...)):
+    contents = await file.read()
+    pdf_reader = PdfReader(io.BytesIO(contents))
+    
+    extracted_text = ""
+    for page in pdf_reader.pages:
+        extracted_text += page.extract_text()
+    
+    chunks = chunk_text(extracted_text)
+    summary = summarize_report(chunks)
+    
+    return {"filename": file.filename, "summary": summary}
