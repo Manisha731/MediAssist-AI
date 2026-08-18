@@ -155,3 +155,12 @@ def explain_to_patient(payload: ExplanationRequest):
         payload.medical_context
     )
     return {"explanation": explanation}
+
+from pipeline import run_full_pipeline
+
+@app.post("/process-report")
+async def process_report(file: UploadFile = File(...), drug_names: str = ""):
+    contents = await file.read()
+    drug_list = [d.strip() for d in drug_names.split(",") if d.strip()]
+    result = run_full_pipeline(contents, file.filename, drug_list)
+    return result
