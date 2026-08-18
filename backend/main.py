@@ -139,3 +139,19 @@ def fetch_medical_knowledge(payload: TopicRequest):
     stored_count = store_medline_knowledge(payload.term)
     retrieved = retrieve_relevant_knowledge(payload.term)
     return {"term": payload.term, "stored_topics": stored_count, "retrieved_content": retrieved}
+
+from explanation_agent import generate_patient_explanation
+
+class ExplanationRequest(BaseModel):
+    summary: str
+    drug_interactions: list = None
+    medical_context: list = None
+
+@app.post("/explain-to-patient")
+def explain_to_patient(payload: ExplanationRequest):
+    explanation = generate_patient_explanation(
+        payload.summary,
+        payload.drug_interactions,
+        payload.medical_context
+    )
+    return {"explanation": explanation}
