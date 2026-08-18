@@ -8,11 +8,7 @@ from medical_retrieval import retrieve_relevant_knowledge
 from explanation_agent import generate_patient_explanation
 
 
-def extract_drug_names_from_text(text: str) -> list[str]:
-    """Very simple placeholder: real version would use NLP/regex to pull medication names
-    from the report. For now, this can be passed in separately by the caller."""
-    return []
-
+from medical_retrieval import store_medline_knowledge, retrieve_relevant_knowledge
 
 def run_full_pipeline(pdf_bytes: bytes, filename: str, drug_names: list[str] = None) -> dict:
     # Step 1: Extract text from PDF
@@ -22,22 +18,27 @@ def run_full_pipeline(pdf_bytes: bytes, filename: str, drug_names: list[str] = N
         extracted_text += page.extract_text()
 
     # Step 2: Chunk and store in Chroma
-    from main import chunk_text  # reuse existing chunking function
+    from main import chunk_text
     chunks = chunk_text(extracted_text)
     store_chunks(chunks, report_id=filename)
 
     # Step 3: Report Summarizer agent
     summary = summarize_report(chunks)
 
-    # Step 4: Drug Interaction Agent (only if drug names were provided)
+    # Step 4: Drug Interaction Agent
     drug_results = []
     if drug_names:
         drug_results = check_drug_interactions(drug_names)
 
-    # Step 5: Medical Knowledge Retrieval Agent (use summary as the query)
+    # Step 5: Medical Knowledge Retrieval Agent
+    # NEW: figure out a relevant medical term to fetch, and populate the knowledge base first
+    key_terms = ["diabetes", "high cholesterol"]  # simple hardcoded starting point
+    for term in key_terms:
+        store_medline_knowledge(term)  # fetch + store MedlinePlus content for each term
+
     medical_context = retrieve_relevant_knowledge(summary)
 
-    # Step 6: Patient Explanation Agent (combines everything)
+    # Step 6: Patient Explanation Agent
     final_explanation = generate_patient_explanation(
         summary=summary,
         drug_interactions=drug_results,
