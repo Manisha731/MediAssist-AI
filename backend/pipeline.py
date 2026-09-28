@@ -4,7 +4,7 @@ from pypdf import PdfReader
 from vectorstore import store_chunks
 from summarizer import summarize_report
 from drug_interaction import check_drug_interactions
-from medical_retrieval import retrieve_relevant_knowledge
+from medical_retrieval import store_medline_knowledge, retrieve_relevant_knowledge
 from explanation_agent import generate_patient_explanation
 
 

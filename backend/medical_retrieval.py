@@ -1,3 +1,5 @@
+import re
+import html
 import httpx
 import xml.etree.ElementTree as ET
 from vectorstore import embedding_model, chroma_client
@@ -5,6 +7,14 @@ from vectorstore import embedding_model, chroma_client
 medline_collection = chroma_client.get_or_create_collection(name="medline_knowledge")
 
 MEDLINE_BASE = "https://wsearch.nlm.nih.gov/ws/query"
+
+
+def clean_html(text: str) -> str:
+    """Remove HTML tags from MedlinePlus text and tidy the whitespace."""
+    text = re.sub(r"<[^>]+>", " ", text)   # remove tags like <span class="qt0">
+    text = html.unescape(text)             # turn &amp; etc. into normal characters
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 
 def fetch_medline_topic(term: str) -> list[dict]:
@@ -71,4 +81,5 @@ def retrieve_relevant_knowledge(query: str, n_results: int = 2) -> list[str]:
         query_embeddings=query_embedding,
         n_results=n_results
     )
-    return results["documents"][0] if results["documents"] else []
+    docs = results["documents"][0] if results["documents"] else []
+    return [clean_html(d) for d in docs]
