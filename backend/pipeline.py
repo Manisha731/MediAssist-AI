@@ -8,7 +8,6 @@ from medical_retrieval import retrieve_relevant_knowledge
 from explanation_agent import generate_patient_explanation
 
 
-from medical_retrieval import store_medline_knowledge, retrieve_relevant_knowledge
 
 def run_full_pipeline(pdf_bytes: bytes, filename: str, drug_names: list[str] = None) -> dict:
     # Step 1: Extract text from PDF
@@ -30,13 +29,16 @@ def run_full_pipeline(pdf_bytes: bytes, filename: str, drug_names: list[str] = N
     if drug_names:
         drug_results = check_drug_interactions(drug_names)
 
-    # Step 5: Medical Knowledge Retrieval Agent
-    # NEW: figure out a relevant medical term to fetch, and populate the knowledge base first
+   # Step 5: Medical Knowledge Retrieval Agent
     key_terms = ["diabetes", "high cholesterol"]  # simple hardcoded starting point
     for term in key_terms:
-        store_medline_knowledge(term)  # fetch + store MedlinePlus content for each term
+        store_medline_knowledge(term)  # cached after first successful fetch
 
-    medical_context = retrieve_relevant_knowledge(summary)
+    try:
+        medical_context = retrieve_relevant_knowledge(summary)
+    except Exception as e:
+        print(f"[pipeline] knowledge retrieval failed: {e}")
+        medical_context = []
 
     # Step 6: Patient Explanation Agent
     final_explanation = generate_patient_explanation(
