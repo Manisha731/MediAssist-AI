@@ -8,7 +8,7 @@ client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=os.getenv("NVIDIA_API_KEY"),
     timeout=90,
-    max_retries=3,
+    max_retries=6,
 )
 
 MODEL = "nvidia/nemotron-3-super-120b-a12b"
