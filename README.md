@@ -147,6 +147,4 @@ The model name is intentionally isolated to a single `MODEL` (or `_MODEL`) varia
 
 ---
 
-## Team
 
-Built by Joel and Koushik. Model and architecture decisions were made jointly.
