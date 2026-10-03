@@ -18,14 +18,32 @@ function App() {
   if (!acceptedDisclaimer) {
     screen = 'disclaimer';
     content = (
-      <div>
-        <h2>Before you continue</h2>
-        <p>
-          MediAssist AI gives AI-generated summaries and explanations for
-          informational purposes only. It is not medical advice. Always consult
-          a healthcare provider before making treatment decisions.
+      <div className="card">
+        <h1 id="disclaimer-title">Before you continue</h1>
+        <p className="lead">
+          Please read this notice. It applies to everything MediAssist AI shows you.
         </p>
-        <button onClick={() => setAcceptedDisclaimer(true)}>I understand</button>
+        <div
+          className="disclaimer disclaimer--notice"
+          role="note"
+          aria-labelledby="disclaimer-title"
+        >
+          <svg className="notice-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d="M12 11v6M12 7.5v.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          <p>
+            MediAssist AI gives AI-generated summaries and explanations for
+            informational purposes only. It is not medical advice. Always consult
+            a healthcare provider before making treatment decisions.
+          </p>
+        </div>
+        <button
+          className="button button-primary button-block"
+          onClick={() => setAcceptedDisclaimer(true)}
+        >
+          I understand
+        </button>
       </div>
     );
   } else if (!isLoggedIn) {
