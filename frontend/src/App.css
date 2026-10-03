@@ -286,10 +286,20 @@
   background: var(--color-danger-bg);
   color: var(--color-danger);
   border: 1px solid var(--color-danger-border);
+  font-size: 15px;
   font-weight: 600;
   display: flex;
   gap: var(--space-2);
   align-items: flex-start;
+}
+
+.disclaimer--prominent p {
+  margin: 0;
+  color: inherit;
+}
+
+.disclaimer--prominent .notice-icon {
+  color: inherit;
 }
 
 /* Banners (error/success) fade in inside an aria-live region */
@@ -500,19 +510,6 @@
 
 .reveal--now {
   animation: none;
-}
-
-.disclaimer--prominent {
-  font-size: 15px;
-}
-
-.disclaimer--prominent p {
-  margin: 0;
-  color: inherit;
-}
-
-.disclaimer--prominent .notice-icon {
-  color: inherit;
 }
 
 .result-text {
