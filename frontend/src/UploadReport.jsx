@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const GENERAL_DISCLAIMER =
   'This is an AI-generated summary for informational purposes only. It is not medical advice. Always consult a healthcare provider before making treatment decisions.';
@@ -24,6 +24,7 @@ function UploadReport() {
   const [usedDrugs, setUsedDrugs] = useState(false);
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
+  const resultsRef = useRef(null);
 
   // Elapsed-time counter: the only progress the backend lets us report honestly.
   useEffect(() => {
@@ -34,6 +35,17 @@ function UploadReport() {
     }, 1000);
     return () => clearInterval(id);
   }, [loading]);
+
+  // Bring new results into view and move focus there for keyboard/screen-reader users.
+  useEffect(() => {
+    if (!result || !resultsRef.current) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    resultsRef.current.focus({ preventScroll: true });
+    resultsRef.current.scrollIntoView({
+      behavior: reduceMotion ? 'auto' : 'smooth',
+      block: 'start',
+    });
+  }, [result]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -158,19 +170,47 @@ function UploadReport() {
         )}
       </div>
 
-      {result && (
-        <div>
-          <h3>Summary</h3>
-          <p style={{ whiteSpace: 'pre-wrap' }}>{result.summary}</p>
-          <p style={{ fontSize: '0.85em', color: '#666' }}>{GENERAL_DISCLAIMER}</p>
+      <div className="visually-hidden" role="status">
+        {result ? 'Your results are ready.' : ''}
+      </div>
 
-          <h3>Final Explanation</h3>
-          <p style={{ whiteSpace: 'pre-wrap' }}>{result.final_explanation}</p>
-          <p style={{ fontSize: '0.85em', color: '#666' }}>{GENERAL_DISCLAIMER}</p>
+      {result && (
+        <section
+          ref={resultsRef}
+          className="results"
+          tabIndex={-1}
+          aria-labelledby="results-title"
+        >
+          <h2 id="results-title" className="results-title">Your results</h2>
+
+          <article className="card result-card reveal">
+            <h3>Summary</h3>
+            <p className="result-text">{result.summary}</p>
+            <p className="disclaimer disclaimer--muted">{GENERAL_DISCLAIMER}</p>
+          </article>
+
+          <article className="card result-card reveal reveal--2">
+            <h3>Final explanation</h3>
+            <p className="result-text">{result.final_explanation}</p>
+            <p className="disclaimer disclaimer--muted">{GENERAL_DISCLAIMER}</p>
+          </article>
+
           {usedDrugs && (
-            <p style={{ fontSize: '0.85em', color: '#b00020' }}>{DRUG_DISCLAIMER}</p>
+            <div className="disclaimer disclaimer--prominent reveal--now" role="note">
+              <svg className="notice-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 3 2 21h20L12 3Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path d="M12 10v5M12 17.5v.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <p>{DRUG_DISCLAIMER}</p>
+            </div>
           )}
-        </div>
+        </section>
       )}
     </div>
   );

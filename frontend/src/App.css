@@ -246,7 +246,7 @@
 
 .disclaimer--muted {
   background: var(--color-surface-alt);
-  color: var(--color-text-muted);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
 }
 
@@ -444,6 +444,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .reveal--2 {
+    animation-delay: 0s;
+  }
+
   .progress-bar {
     animation: none;
     margin: 0 auto;
@@ -455,6 +459,61 @@
 }
 
 /* Results */
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  scroll-margin-top: var(--space-5);
+}
+
+.results:focus {
+  outline: none;
+}
+
+.results-title {
+  margin: 0;
+}
+
+.result-card .result-text {
+  margin-bottom: var(--space-4);
+}
+
+.result-card h3 {
+  margin-bottom: var(--space-3);
+}
+
+.result-card .disclaimer {
+  margin: 0;
+}
+
+/* Staged reveal: the explanation follows the summary by a beat.
+   Each card carries its own disclaimer, so nothing is ever revealed later
+   than the text it qualifies. The drug-interaction notice shows at once. */
+.reveal {
+  animation: screen-in 260ms var(--ease-out) both;
+}
+
+.reveal--2 {
+  animation-delay: 100ms;
+}
+
+.reveal--now {
+  animation: none;
+}
+
+.disclaimer--prominent {
+  font-size: 15px;
+}
+
+.disclaimer--prominent p {
+  margin: 0;
+  color: inherit;
+}
+
+.disclaimer--prominent .notice-icon {
+  color: inherit;
+}
 
 .result-text {
   white-space: pre-wrap;
