@@ -335,6 +335,80 @@
   font-size: 14px;
 }
 
+/* Upload form extras */
+
+.optional {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.file-field input[type='file']:focus-visible + .button {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.file-field input[type='file']:disabled + .button {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading panel: shows only what is known (time elapsed) */
+
+.progress-panel {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-border);
+}
+
+.progress-text {
+  margin: 0 0 var(--space-3);
+  font-size: 15px;
+}
+
+.progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+.progress-bar {
+  width: 35%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-accent);
+  animation: progress-slide 1.6s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(290%);
+  }
+}
+
+.progress-time {
+  margin: var(--space-3) 0 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.progress-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
 /* Loading state */
 
 .loading-row {
@@ -370,6 +444,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .progress-bar {
+    animation: none;
+    margin: 0 auto;
+  }
+
   .spinner {
     animation-duration: 2s;
   }

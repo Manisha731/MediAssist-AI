@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const GENERAL_DISCLAIMER =
   'This is an AI-generated summary for informational purposes only. It is not medical advice. Always consult a healthcare provider before making treatment decisions.';
@@ -13,6 +13,9 @@ const cleanDrugNames = (text) =>
     .filter(Boolean)
     .join(',');
 
+const formatElapsed = (seconds) =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+
 function UploadReport() {
   const [file, setFile] = useState(null);
   const [drugNames, setDrugNames] = useState('');
@@ -20,6 +23,17 @@ function UploadReport() {
   const [result, setResult] = useState(null);
   const [usedDrugs, setUsedDrugs] = useState(false);
   const [error, setError] = useState('');
+  const [elapsed, setElapsed] = useState(0);
+
+  // Elapsed-time counter: the only progress the backend lets us report honestly.
+  useEffect(() => {
+    if (!loading) return undefined;
+    const start = Date.now();
+    const id = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - start) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [loading]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -27,6 +41,7 @@ function UploadReport() {
 
     const cleaned = cleanDrugNames(drugNames);
 
+    setElapsed(0);
     setLoading(true);
     setError('');
     setResult(null);
@@ -64,27 +79,84 @@ function UploadReport() {
   };
 
   return (
-    <div>
-      <h2>Upload a Medical Report</h2>
-      <form onSubmit={handleUpload}>
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={(e) => setFile(e.target.files[0])}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Medications (comma-separated, e.g. warfarin,ibuprofen)"
-          value={drugNames}
-          onChange={(e) => setDrugNames(e.target.value)}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Processing... this can take up to a minute' : 'Upload & Analyze'}
-        </button>
-      </form>
+    <div className="page-stack">
+      <div className="card">
+        <h1>Upload a medical report</h1>
+        <p className="lead">
+          Choose a PDF and, if you like, list your medications. You will get a
+          plain-language summary and explanation.
+        </p>
+        <form className="form" onSubmit={handleUpload}>
+          <fieldset className="fieldset" disabled={loading}>
+            <div className="form-group">
+              <label className="label" htmlFor="report-file">Medical report (PDF)</label>
+              <div className="file-field">
+                <input
+                  id="report-file"
+                  type="file"
+                  accept="application/pdf"
+                  aria-describedby="report-file-name"
+                  onChange={(e) => setFile(e.target.files[0] || null)}
+                  required
+                />
+                <label htmlFor="report-file" className="button button-secondary">
+                  {file ? 'Change file' : 'Choose PDF'}
+                </label>
+                <span
+                  id="report-file-name"
+                  className={file ? 'file-name file-name--chosen' : 'file-name'}
+                >
+                  {file ? file.name : 'No file chosen'}
+                </span>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="label" htmlFor="drug-names">
+                Medications <span className="optional">(optional)</span>
+              </label>
+              <input
+                id="drug-names"
+                className="input"
+                type="text"
+                autoComplete="off"
+                aria-describedby="drug-names-help"
+                placeholder="e.g. warfarin, ibuprofen"
+                value={drugNames}
+                onChange={(e) => setDrugNames(e.target.value)}
+              />
+              <span id="drug-names-help" className="helper-text">
+                Separate medications with commas. We will also check them for known interactions.
+              </span>
+            </div>
+          </fieldset>
+          <div aria-live="polite">
+            {error && <p className="error-banner banner-in">{error}</p>}
+          </div>
+          <button
+            type="submit"
+            className="button button-primary button-block"
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading && <span className="spinner spinner--small" aria-hidden="true" />}
+            {loading ? 'Analyzing…' : 'Upload & analyze'}
+          </button>
+        </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+        {loading && (
+          <div className="progress-panel banner-in">
+            <p className="progress-text" role="status">
+              Analyzing your report. This can take up to a minute, so please keep this page open.
+            </p>
+            <div className="progress-track" aria-hidden="true">
+              <div className="progress-bar" />
+            </div>
+            <p className="progress-time" aria-hidden="true">
+              Time elapsed: <span className="progress-clock">{formatElapsed(elapsed)}</span>
+            </p>
+          </div>
+        )}
+      </div>
 
       {result && (
         <div>
