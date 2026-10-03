@@ -8,6 +8,7 @@ function App() {
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [justSignedUp, setJustSignedUp] = useState(false);
 
   const screenRef = useRef(null);
   const isFirstRender = useRef(true);
@@ -49,15 +50,22 @@ function App() {
   } else if (!isLoggedIn) {
     screen = showSignup ? 'signup' : 'login';
     content = showSignup ? (
-      <div>
-        <Signup onSignupSuccess={() => setShowSignup(false)} />
-        <button onClick={() => setShowSignup(false)}>Already have an account? Login</button>
-      </div>
+      <Signup
+        onSignupSuccess={() => {
+          setJustSignedUp(true);
+          setShowSignup(false);
+        }}
+        onSwitch={() => setShowSignup(false)}
+      />
     ) : (
-      <div>
-        <Login onLoginSuccess={() => setIsLoggedIn(true)} />
-        <button onClick={() => setShowSignup(true)}>Need an account? Sign up</button>
-      </div>
+      <Login
+        onLoginSuccess={() => setIsLoggedIn(true)}
+        notice={justSignedUp ? 'Account created. Please log in.' : ''}
+        onSwitch={() => {
+          setJustSignedUp(false);
+          setShowSignup(true);
+        }}
+      />
     );
   } else {
     screen = 'upload';

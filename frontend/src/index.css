@@ -16,6 +16,10 @@
   --color-danger-bg: #fbeae8;
   --color-danger-border: #eec9c4;
 
+  --color-success: #1f5f3a;
+  --color-success-bg: #e8f3ec;
+  --color-success-border: #bfdcc9;
+
   --color-focus-ring: #2f5d80;
 
   --radius-sm: 6px;
@@ -66,6 +70,10 @@
     --color-danger: #f2a8a1;
     --color-danger-bg: #3a2320;
     --color-danger-border: #5a332d;
+
+    --color-success: #9ad3b1;
+    --color-success-bg: #1f2e25;
+    --color-success-border: #33503f;
 
     --color-focus-ring: #8fb4d1;
 
