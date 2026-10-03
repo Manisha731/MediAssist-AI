@@ -7,26 +7,23 @@ from openai import OpenAI
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=os.getenv("NVIDIA_API_KEY"),
-    timeout=90,
+    timeout=60,
+    max_retries=3,
 )
 
-MODEL = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
-QUESTION = "Explain in two sentences why a high A1C matters, in plain language."
+MODEL = "openai/gpt-oss-20b"
 
-def run(label, messages, **params):
-    start = time.time()
-    resp = client.chat.completions.create(model=MODEL, messages=messages, max_tokens=1024, **params)
-    print(f"--- {label} ({time.time() - start:.1f}s) ---")
-    print(resp.choices[0].message.content)
-    print()
-
-# Reasoning OFF (recommended settings: greedy)
-run("reasoning OFF",
-    [{"role": "system", "content": "/no_think"},
-     {"role": "user", "content": QUESTION}],
-    temperature=0)
-
-# Reasoning ON (default, recommended settings)
-run("reasoning ON",
-    [{"role": "user", "content": QUESTION}],
-    temperature=0.6, top_p=0.95)
+start = time.time()
+resp = client.chat.completions.create(
+    model=MODEL,
+    messages=[{"role": "user", "content": "In 2 sentences, explain in plain language why high LDL cholesterol matters."}],
+    max_tokens=500,
+    reasoning_effort="low",
+)
+print(f"Took {time.time() - start:.1f}s")
+print("--- content ---")
+print(resp.choices[0].message.content)
+reasoning = getattr(resp.choices[0].message, "reasoning_content", None)
+if reasoning:
+    print("--- reasoning_content (should NOT show up in your app's output) ---")
+    print(reasoning[:300])

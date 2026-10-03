@@ -4,9 +4,8 @@ from pypdf import PdfReader
 from vectorstore import store_chunks
 from summarizer import summarize_report
 from drug_interaction import check_drug_interactions
-from medical_retrieval import store_medline_knowledge, retrieve_relevant_knowledge
+from medical_retrieval import store_medline_knowledge, retrieve_relevant_knowledge, extract_key_terms
 from explanation_agent import generate_patient_explanation
-
 
 
 def run_full_pipeline(pdf_bytes: bytes, filename: str, drug_names: list[str] = None) -> dict:
@@ -30,7 +29,8 @@ def run_full_pipeline(pdf_bytes: bytes, filename: str, drug_names: list[str] = N
         drug_results = check_drug_interactions(drug_names)
 
    # Step 5: Medical Knowledge Retrieval Agent
-    key_terms = ["diabetes", "high cholesterol"]  # simple hardcoded starting point
+    key_terms = extract_key_terms(summary)
+    print(f"[pipeline] extracted terms: {key_terms}")
     for term in key_terms:
         store_medline_knowledge(term)  # cached after first successful fetch
 

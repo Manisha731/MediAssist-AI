@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -11,7 +12,15 @@ client = OpenAI(
     max_retries=6,
 )
 
-MODEL = "nvidia/nemotron-3-super-120b-a12b"
+MODEL = "openai/gpt-oss-20b"
+
+
+def strip_markdown(text: str) -> str:
+    """Remove common markdown symbols the model sometimes adds despite instructions."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)   # **bold** -> bold
+    text = re.sub(r"^#+\s*", "", text, flags=re.MULTILINE)  # leading # headers
+    text = text.replace("*", "")                   # stray asterisks (bullets, etc.)
+    return text
 
 
 def find_cross_mentions(drug_interactions: list) -> list[str]:
@@ -78,11 +87,9 @@ Write the final explanation directly to the patient. Do not include any planning
 
     response = client.chat.completions.create(
         model=MODEL,
-        messages=[
-            {"role": "system", "content": "/no_think"},
-            {"role": "user", "content": prompt},
-        ],
+        messages=[{"role": "user", "content": prompt}],
         max_tokens=2000,
         temperature=0,
+        reasoning_effort="low",
     )
-    return response.choices[0].message.content
+    return strip_markdown(response.choices[0].message.content)

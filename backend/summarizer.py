@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -8,10 +9,18 @@ client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=os.getenv("NVIDIA_API_KEY"),
     timeout=90,
-    max_retries=6,  # retries automatically on 503 / 429 errors
+    max_retries=6,
 )
 
-MODEL = "nvidia/nemotron-3-super-120b-a12b"
+MODEL = "openai/gpt-oss-20b"
+
+
+def strip_markdown(text: str) -> str:
+    """Remove common markdown symbols the model sometimes adds despite instructions."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)   # **bold** -> bold
+    text = re.sub(r"^#+\s*", "", text, flags=re.MULTILINE)  # leading # headers
+    text = text.replace("*", "")                   # stray asterisks (bullets, etc.)
+    return text
 
 
 def summarize_report(chunks: list[str]) -> str:
@@ -31,5 +40,6 @@ Summary:"""
         messages=[{"role": "user", "content": prompt}],
         max_tokens=2000,
         temperature=0.3,
+        reasoning_effort="low",
     )
-    return response.choices[0].message.content
+    return strip_markdown(response.choices[0].message.content)
