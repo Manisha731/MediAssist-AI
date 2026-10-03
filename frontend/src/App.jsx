@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import './App.css';
 import Login from './Login';
 import Signup from './Signup';
 import UploadReport from './UploadReport';
@@ -8,9 +9,16 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
+  const screenRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  let screen;
+  let content;
+
   if (!acceptedDisclaimer) {
-    return (
-      <div style={{ maxWidth: 560, margin: '40px auto', padding: 16 }}>
+    screen = 'disclaimer';
+    content = (
+      <div>
         <h2>Before you continue</h2>
         <p>
           MediAssist AI gives AI-generated summaries and explanations for
@@ -20,26 +28,44 @@ function App() {
         <button onClick={() => setAcceptedDisclaimer(true)}>I understand</button>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    if (showSignup) {
-      return (
-        <div>
-          <Signup onSignupSuccess={() => setShowSignup(false)} />
-          <button onClick={() => setShowSignup(false)}>Already have an account? Login</button>
-        </div>
-      );
-    }
-    return (
+  } else if (!isLoggedIn) {
+    screen = showSignup ? 'signup' : 'login';
+    content = showSignup ? (
+      <div>
+        <Signup onSignupSuccess={() => setShowSignup(false)} />
+        <button onClick={() => setShowSignup(false)}>Already have an account? Login</button>
+      </div>
+    ) : (
       <div>
         <Login onLoginSuccess={() => setIsLoggedIn(true)} />
         <button onClick={() => setShowSignup(true)}>Need an account? Sign up</button>
       </div>
     );
+  } else {
+    screen = 'upload';
+    content = <UploadReport />;
   }
 
-  return <UploadReport />;
+  // Move focus to the new screen so keyboard and screen-reader users
+  // aren't left on an element that was just removed.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    screenRef.current?.focus();
+  }, [screen]);
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <span className="brand">MediAssist AI</span>
+      </header>
+      <main className="page-shell screen" key={screen} ref={screenRef} tabIndex={-1}>
+        {content}
+      </main>
+    </div>
+  );
 }
 
 export default App;
